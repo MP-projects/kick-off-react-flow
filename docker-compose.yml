@@ -1,0 +1,21 @@
+version: "3"
+services:
+  frontend:
+    stdin_open: true
+    tty: true
+    build: .
+    ports: 
+    - "3000:3000"
+    volumes:
+    - "./src:/app/src"
+    environment:
+    - REACT_APP_NAME=react_flow
+    - WATCHPACK_POLLING=true
+  json-server:
+   image: vimagick/json-server
+   command: -H 0.0.0.0 -p 4000 -w db.json
+   ports:
+    - "4000:4000"
+   volumes:
+    - ./data:/data
+   restart: always

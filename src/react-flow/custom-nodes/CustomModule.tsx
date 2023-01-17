@@ -1,7 +1,6 @@
 import { Handle, Position } from "reactflow";
-import { Card } from "@mui/material";
-import { useState } from "react";
 
+import { useAppContext } from "../../hooks/useAppContext";
 //styles
 import "./CustomModule.css";
 
@@ -9,13 +8,24 @@ import "./CustomModule.css";
 import socket from "../../assets/socket.png";
 
 export const CustomModule = (props: any) => {
-//   const [isConnectable, setIsConnectable] = useState(true);
+  const { editMode } = useAppContext();
+
+  const isValidConnectionTarget = (connection: any) => {
+    return connection.source !== props.id;
+  };
+  const isValidConnectionSource = (connection: any) => {
+    return connection.target !== props.id;
+  };
 
   return (
     <>
-      <div className="customModule">
-        <aside className="customModule__input-container">
-          <div className="customModule__input">
+      <div className={`customModule`}>
+        <aside
+          className={`customModule__input-container ${
+            props.selected ? "customModule__input-container--selected" : ""
+          }`}
+        >
+          <div className={`customModule__input`}>
             <Handle
               type="target"
               position={Position.Left}
@@ -30,10 +40,11 @@ export const CustomModule = (props: any) => {
                 zIndex: "-1",
               }}
               id="a"
-            //   onConnect={() => {
-            //     setIsConnectable(false);
-            //   }}
-            //   isConnectable={isConnectable}
+              //   onConnect={() => {
+              //     setIsConnectable(false);
+              //   }}
+              isConnectable={editMode}
+              isValidConnection={isValidConnectionTarget}
             />
             {/* <div className="circle circle--blue circle--blue-input"></div> */}
             <p className="customModule__input-p">in 1 </p>
@@ -44,7 +55,11 @@ export const CustomModule = (props: any) => {
             />
           </div>
         </aside>
-        <main className="customModule__info info">
+        <main
+          className={`customModule__info info ${
+            props.selected ? "info--selected" : ""
+          }`}
+        >
           <div className="circle-container">
             <div className="circle circle--orange"></div>
             <div className="circle circle--red"></div>
@@ -54,7 +69,11 @@ export const CustomModule = (props: any) => {
           <div className="info__text info__text--ip">{props.data.ip}</div>
           <div className="info__text info__texy--type">{props.data.type}</div>
         </main>
-        <aside className="customModule__output-container">
+        <aside
+          className={`customModule__output-container ${
+            props.selected ? "customModule__output-container--selected" : ""
+          }`}
+        >
           <div className="customModule__output">
             {/* <div className="circle circle--blue"></div> */}
             <Handle
@@ -71,6 +90,8 @@ export const CustomModule = (props: any) => {
                 zIndex: "-1",
               }}
               id="b"
+              isConnectable={editMode}
+              isValidConnection={isValidConnectionSource}
             />
             <p className="customModule__output-p">out 3 </p>
             <img
@@ -95,6 +116,8 @@ export const CustomModule = (props: any) => {
                 zIndex: "-1",
               }}
               id="c"
+              isConnectable={editMode}
+              isValidConnection={isValidConnectionSource}
             />
             <p className="customModule__output-p">out 2</p>
             <img
@@ -119,6 +142,8 @@ export const CustomModule = (props: any) => {
                 zIndex: "-1",
               }}
               id="d"
+              isConnectable={editMode}
+              isValidConnection={isValidConnectionSource}
             />
             <p className="customModule__output-p">out 3</p>
             <img

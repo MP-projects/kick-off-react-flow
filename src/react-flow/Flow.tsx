@@ -1,12 +1,19 @@
-import { useCallback, useMemo, useState, useRef } from "react";
+import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
   Background,
   useNodesState,
   useEdgesState,
+  applyNodeChanges,
+  applyEdgeChanges,
   addEdge,
   ReactFlowProvider,
+  Node,
+  Edge,
+  NodeChange,
+  EdgeChange,
+  Connection,
 } from "reactflow";
 
 //hooks
@@ -14,7 +21,8 @@ import { useAppContext } from "../hooks/useAppContext";
 
 //components
 import { CustomModule } from "./custom-nodes/CustomModule";
-import SideBar from "./components/sidebar/Sidebar";
+import { SideBar } from "./components/sidebar/Sidebar";
+import { Appbar } from "./components/appbar/Appbar";
 
 import "reactflow/dist/style.css";
 
@@ -23,42 +31,87 @@ interface ModuleType {
   position: { x: number; y: number };
   data: { id: string; ip: string; type: string };
   type: "module";
+  draggable: boolean;
+  deletable: boolean;
+  connectable: boolean;
 }
-
-const initialNodes: ModuleType[] = [
-  {
-    id: "1",
-    position: { x: 300, y: 100 },
-    data: { id: "0001", ip: "10.01.01", type: "sterownik prosty" },
-    type: "module",
-  },
-
-  {
-    id: "2",
-    position: { x: 300, y: 400 },
-    data: { id: "0001", ip: "10.01.01", type: "sterownik prosty" },
-    type: "module",
-  },
+let id = 3;
+let y = 700;
+const initialEdges = [
+  { id: "e1-2", source: "1", target: "2", type: "step" },
 ];
-
-const initialEdges = [{ id: "e1-2", source: "1", target: "2" }];
 
 const getId = () => new Date().getTime().toString();
 
 export const Flow = () => {
-  
   const { editMode } = useAppContext();
+
+  const initialNodes: ModuleType[] = [
+    {
+      id: "1",
+      position: { x: 300, y: 100 },
+      data: { id: "0001", ip: "10.01.01", type: "sterownik prosty" },
+      type: "module",
+      draggable: editMode,
+      deletable: editMode,
+      connectable: editMode,
+    },
+
+    {
+      id: "2",
+      position: { x: 300, y: 400 },
+      data: { id: "0001", ip: "10.01.01", type: "sterownik prosty" },
+      type: "module",
+      draggable: editMode,
+      deletable: editMode,
+      connectable: editMode,
+    },
+  ];
+
+  const newNodes = () => {
+    for (let i = 0; i < 400; i++) {
+      initialNodes.push({
+        id: id.toString(),
+        position: { x: 300, y: y },
+        data: { id: id.toString(), ip: "10.01.01", type: "sterownik prosty" },
+        type: "module",
+        draggable: editMode,
+        deletable: editMode,
+        connectable: editMode,
+      });
+      id++;
+      y = y + 300;
+    }
+  };
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes] = useState<Node[]>(initialNodes);
+  const [edges, setEdges] = useState<Edge[]>(initialEdges);
 
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  console.log(`render`);
+  console.log(nodes);
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) =>
+      setNodes((nds) => {
+        console.log(changes);
+        return applyNodeChanges(changes, nds);
+      }),
+
+    [setNodes]
+  );
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) =>
+      setEdges((eds) => applyEdgeChanges(changes, eds)),
+    [setEdges]
+  );
 
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
   const onConnect = useCallback(
-    (params: any) => setEdges((eds) => addEdge(params, eds)),
+    (params: any) =>
+      setEdges((eds) => addEdge({ ...params, type: "step" }, eds)),
     [setEdges]
   );
   const onDragOver = useCallback((event: any) => {
@@ -82,16 +135,19 @@ export const Flow = () => {
         y: event.clientY - reactFlowBounds.top,
       });
 
-      const newNode = {
+      const newNode: ModuleType = {
         id: getId(),
         data: { id: "0001", ip: "10.01.01", type: "sterownik prosty" },
         type,
         position,
+        draggable: editMode,
+        deletable: editMode,
+        connectable: editMode,
       };
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [reactFlowInstance, setNodes]
+    [reactFlowInstance, setNodes, editMode]
   );
   const nodeTypes = useMemo(
     () => ({
@@ -99,7 +155,20 @@ export const Flow = () => {
     }),
     []
   );
-
+  // useEffect(() => {
+  //   console.log("effect");
+  //   setNodes((nds) => {
+  //     nds.map((node) => {
+  //       console.log(node);
+  //       node.draggable = editMode;
+  //       node.connectable = editMode;
+  //       node.deletable = editMode;
+  //       return node;
+  //     });
+  //     console.log(nds);
+  //     return nds;
+  //   });
+  // }, [editMode, setNodes]);
   return (
     <ReactFlowProvider>
       <ReactFlow
@@ -113,12 +182,15 @@ export const Flow = () => {
         onDrop={onDrop}
         onDragOver={onDragOver}
         onInit={setReactFlowInstance}
+        fitView={true}
+        className="validationflow"
       >
-        <MiniMap />
+        <MiniMap zoomable={true} pannable={true} />
         <Controls />
         <Background />
       </ReactFlow>
-      <SideBar />
+      {editMode && <SideBar />}
+      <Appbar />
     </ReactFlowProvider>
   );
 };

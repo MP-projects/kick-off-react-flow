@@ -4,3 +4,8 @@ export interface FlowNode {
   data: {};
   type: string;
 }
+export interface AppContextProps {
+  editMode: boolean
+  changeMode:(editMode:boolean)=>void
+
+}

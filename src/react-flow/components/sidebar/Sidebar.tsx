@@ -5,7 +5,7 @@ import { useReactFlow } from "reactflow";
 //assets
 import Module from "../../../assets/module.png";
 
-export default function SideBar() {
+export const SideBar = () => {
   const reactFlowInstance = useReactFlow();
 
   const { setNodes, setEdges, setViewport } = useReactFlow();
@@ -27,6 +27,7 @@ export default function SideBar() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        zIndex: "10000",
       }}
     >
       <nav>
@@ -73,4 +74,4 @@ export default function SideBar() {
       </nav>
     </Box>
   );
-}
+};

@@ -1,6 +1,14 @@
 import { createContext, useReducer } from "react";
 
-export const AppContext = createContext(undefined);
+//types
+import { AppContextProps } from "../types/interfaces";
+
+
+
+
+export const AppContext = createContext<AppContextProps>({editMode:false, changeMode:()=>{}});
+
+type ChangeModeFunction = (arg1:boolean)=>void
 
 const appReducer = (state:any, action:any) => {
   switch (action.type) {
@@ -11,18 +19,18 @@ const appReducer = (state:any, action:any) => {
   }
 };
 
-export const AppProvider = ({ children } : {children:any})=> {
+export const AppProvider = ({ children }:any)=> {
 
   const [state, dispatch] = useReducer(appReducer, {
   editMode:false
   });
 
-  const changeMode = (editMode:boolean) => {
+  const changeMode:ChangeModeFunction = (editMode:boolean) => {
     dispatch({ type: "CHANGE_MODE", payload: editMode});
   };
 
   return (
-    <AppContext.Provider value={{ ...state, changeMode }}>
+    <AppContext.Provider value={{ ...state, changeMode}}>
       {children}
     </AppContext.Provider>
   )

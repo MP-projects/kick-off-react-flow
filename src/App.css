@@ -3,6 +3,13 @@
   height: 100vh;
 }
 
-.react-flow__pane{
+.react-flow__pane {
   background-color: rgba(26, 92, 143, 0.2);
-  }
+}
+.validationflow .react-flow__handle-connecting {
+  background: #ff6060 !important;
+}
+
+.validationflow .react-flow__handle-valid {
+  background-color: #55dd99 !important;
+}

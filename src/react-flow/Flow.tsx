@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
+
 import ReactFlow, {
+
   MiniMap,
   Controls,
   Background,
-  useNodesState,
-  useEdgesState,
   applyNodeChanges,
   applyEdgeChanges,
   addEdge,
@@ -13,7 +13,7 @@ import ReactFlow, {
   Edge,
   NodeChange,
   EdgeChange,
-  Connection,
+
 } from "reactflow";
 
 //hooks
@@ -26,15 +26,10 @@ import { Appbar } from "./components/appbar/Appbar";
 
 import "reactflow/dist/style.css";
 
-interface ModuleType {
-  id: string;
-  position: { x: number; y: number };
-  data: { id: string; ip: string; type: string };
-  type: "module";
-  draggable: boolean;
-  deletable: boolean;
-  connectable: boolean;
-}
+//interfaces
+
+import { ModuleType } from "../types/interfaces"
+
 let id = 3;
 let y = 700;
 const initialEdges = [
@@ -88,14 +83,16 @@ export const Flow = () => {
 
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
+  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
-  console.log(`render`);
-  console.log(nodes);
+  // console.log(reactFlowInstance)
+
+// console.log(nodes)
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) =>
       setNodes((nds) => {
-        console.log(changes);
+        // console.log(changes);
         return applyNodeChanges(changes, nds);
       }),
 
@@ -107,7 +104,7 @@ export const Flow = () => {
     [setEdges]
   );
 
-  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+  
 
   const onConnect = useCallback(
     (params: any) =>
@@ -155,20 +152,7 @@ export const Flow = () => {
     }),
     []
   );
-  // useEffect(() => {
-  //   console.log("effect");
-  //   setNodes((nds) => {
-  //     nds.map((node) => {
-  //       console.log(node);
-  //       node.draggable = editMode;
-  //       node.connectable = editMode;
-  //       node.deletable = editMode;
-  //       return node;
-  //     });
-  //     console.log(nds);
-  //     return nds;
-  //   });
-  // }, [editMode, setNodes]);
+
   return (
     <ReactFlowProvider>
       <ReactFlow
@@ -184,6 +168,11 @@ export const Flow = () => {
         onInit={setReactFlowInstance}
         fitView={true}
         className="validationflow"
+        maxZoom={3}
+        minZoom={0.05}
+        snapToGrid={true}
+        snapGrid={[20, 20]}
+        onlyRenderVisibleElements={true}
       >
         <MiniMap zoomable={true} pannable={true} />
         <Controls />

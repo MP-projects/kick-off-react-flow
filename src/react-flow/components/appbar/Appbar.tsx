@@ -3,7 +3,7 @@ import { Typography, Button, Toolbar, Box, AppBar } from "@mui/material";
 import { useReactFlow } from "reactflow";
 
 import { useAppContext } from "../../../hooks/useAppContext";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 //interfaces
 import { ModuleType } from "../../../types/interfaces";
@@ -12,11 +12,15 @@ let id = 3;
 let y = 700;
 
 export const Appbar = () => {
-  const { editMode, changeMode } = useAppContext();
+  const { editMode, changeMode, zoomedOut, changeZoom } = useAppContext();
 
-  const { getNode, getNodes, setNodes } = useReactFlow();
+  const { getNode, getNodes, setNodes, getViewport, zoomTo, getZoom } =
+    useReactFlow();
+  const viewport = getViewport();
+  // console.log(viewport)
   const nodes = getNodes();
-  const addElements = () => {
+
+  const addElements = useCallback(() => {
     let newElements: ModuleType[] = [];
 
     for (let i = 0; i < 100; i++) {
@@ -35,16 +39,20 @@ export const Appbar = () => {
     }
 
     setNodes((nds) => nds.concat(newElements));
-  };
-  const addElementsPlace = () => {
+  }, [editMode, setNodes]);
+
+  const addElementsPlace = useCallback(() => {
     let newElements: ModuleType[] = [];
 
     for (let i = 0; i < 100; i++) {
       const newNode: ModuleType = {
         id: id.toString(),
         data: { id: id.toString(), ip: "10.01.01", type: "sterownik prosty" },
-        type: "module",
-        position: { x: 300, y: 300 },
+        type: "default",
+        position: {
+          x: Math.floor(Math.random() * (100 - 15000) + 15000),
+          y: Math.floor(Math.random() * (100 - 12000) + 12000),
+        },
         draggable: editMode,
         deletable: editMode,
         connectable: editMode,
@@ -55,10 +63,25 @@ export const Appbar = () => {
     }
 
     setNodes((nds) => nds.concat(newElements));
-  };
+  }, [editMode, setNodes]);
+
+  const changeType = useCallback(
+    (type: string) => {
+      setNodes((nds) => {
+        nds.map((node) => {
+          node.type = type;
+          return node;
+        });
+
+        return nds;
+      });
+    },
+    [setNodes]
+  );
 
   useEffect(() => {
     setNodes((nds) => {
+      console.log("effect render");
       nds.map((node) => {
         node.draggable = editMode;
         node.connectable = editMode;
@@ -91,6 +114,20 @@ export const Appbar = () => {
           </Button>
           <Button onClick={addElementsPlace} size="large" color="inherit">
             ADD 100 ELEMENTS IN ONE PLACE
+          </Button>
+          <Button
+            onClick={() => changeType("svgModule")}
+            size="large"
+            color="inherit"
+          >
+            CHANGE TYPES TO SVG
+          </Button>
+          <Button
+            onClick={() => changeType("module")}
+            size="large"
+            color="inherit"
+          >
+            CHANGE TYPES TO DOM ELEMENT
           </Button>
           <Typography>{nodes.length} ELEMENTS</Typography>
         </Toolbar>

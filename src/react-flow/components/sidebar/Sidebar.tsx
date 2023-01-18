@@ -22,7 +22,7 @@ export const SideBar = () => {
         maxWidth: 225,
         bgcolor: "background.paper",
         position: "fixed",
-        top: 0,
+        top: 100,
         left: 0,
         display: "flex",
         alignItems: "center",

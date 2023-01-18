@@ -1,5 +1,5 @@
-import { Handle, Position } from "reactflow";
-
+import { Handle, Position, useReactFlow } from "reactflow";
+import { useCallback, useEffect } from "react";
 import { useAppContext } from "../../hooks/useAppContext";
 //styles
 import "./CustomModule.css";
@@ -10,12 +10,19 @@ import socket from "../../assets/socket.png";
 export const CustomModule = (props: any) => {
   const { editMode } = useAppContext();
 
-  const isValidConnectionTarget = (connection: any) => {
-    return connection.source !== props.id;
-  };
-  const isValidConnectionSource = (connection: any) => {
-    return connection.target !== props.id;
-  };
+  const isValidConnectionTarget = useCallback(
+    (connection: any) => {
+      return connection.source !== props.id;
+    },
+    [props.id]
+  );
+
+  const isValidConnectionSource = useCallback(
+    (connection: any) => {
+      return connection.target !== props.id;
+    },
+    [props.id]
+  );
 
   return (
     <>

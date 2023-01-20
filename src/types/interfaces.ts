@@ -16,7 +16,4 @@ export interface ModuleType {
   position: { x: number; y: number };
   data: { id: string; ip: string; type: string };
   type: "module" | "svgModule"|"default";
-  draggable: boolean;
-  deletable: boolean;
-  connectable: boolean;
 }

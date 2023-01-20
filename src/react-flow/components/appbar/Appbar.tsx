@@ -1,6 +1,13 @@
-import { Typography, Button, Toolbar, Box, AppBar } from "@mui/material";
+import {
+  Typography,
+  Button,
+  Toolbar,
+  Box,
+  AppBar,
+  TextField,
+} from "@mui/material";
 
-import { useReactFlow } from "reactflow";
+import { useReactFlow, Edge, Node } from "reactflow";
 
 import { useAppContext } from "../../../hooks/useAppContext";
 import { useEffect, useState, useCallback } from "react";
@@ -9,89 +16,81 @@ import { useEffect, useState, useCallback } from "react";
 import { ModuleType } from "../../../types/interfaces";
 
 let id = 3;
-let y = 700;
+let edgeId = 0;
+const currentNodes: Node[] = [];
+const currentEdges: Edge[] = [];
+
+const nodesIds: string[] = [];
+
+const newNodes = (number: number) => {
+  for (let i = 0; i < number; i++) {
+    currentNodes.push({
+      id: id.toString(),
+      position: {
+        x: Math.floor(Math.random() * (1000 - 25000) + 25000),
+        y: Math.floor(Math.random() * (1700 - 12000) + 12000),
+      },
+      data: { id: id.toString(), ip: "10.01.01", type: "sterownik prosty" },
+      type: "module",
+    });
+    nodesIds.push(id.toString());
+    id++;
+  }
+};
+
+// newNodes();
+
+const pickNumber = (max: number) => {
+  return Math.floor(Math.random() * max);
+};
+
+const newEdges = (number: number) => {
+  for (let i = 0; i < number; i++) {
+    console.log(nodesIds.length);
+    const index1 = pickNumber(nodesIds.length);
+    const index2 = pickNumber(nodesIds.length);
+    currentEdges.push({
+      id: edgeId.toString(),
+      source: nodesIds[index1],
+      sourceHandle: "b",
+      target: nodesIds[index2],
+      targetHandle: "a",
+      type: "step",
+    });
+    if (i % 2 === 0) {
+      nodesIds.splice(index2, 1);
+    }
+
+    edgeId++;
+  }
+};
 
 export const Appbar = () => {
   const { editMode, changeMode, zoomedOut, changeZoom } = useAppContext();
+  const [edgesNumber, setEdgesNumber] = useState(1000);
+  const [nodesNumber, setNodesNumber] = useState(1000);
 
-  const { getNode, getNodes, setNodes, getViewport, zoomTo, getZoom } =
-    useReactFlow();
+  const {
+    getNode,
+    getNodes,
+    getEdges,
+    setNodes,
+    setEdges,
+    getViewport,
+    zoomTo,
+    getZoom,
+  } = useReactFlow();
   const viewport = getViewport();
   // console.log(viewport)
   const nodes = getNodes();
+  const edges = getEdges();
 
-  const addElements = useCallback(() => {
-    let newElements: ModuleType[] = [];
-
-    for (let i = 0; i < 100; i++) {
-      const newNode: ModuleType = {
-        id: id.toString(),
-        data: { id: id.toString(), ip: "10.01.01", type: "sterownik prosty" },
-        type: "module",
-        position: { x: 300, y },
-        draggable: editMode,
-        deletable: editMode,
-        connectable: editMode,
-      };
-      newElements.push(newNode);
-      id++;
-      y = y + 300;
-    }
-
-    setNodes((nds) => nds.concat(newElements));
-  }, [editMode, setNodes]);
-
-  const addElementsPlace = useCallback(() => {
-    let newElements: ModuleType[] = [];
-
-    for (let i = 0; i < 100; i++) {
-      const newNode: ModuleType = {
-        id: id.toString(),
-        data: { id: id.toString(), ip: "10.01.01", type: "sterownik prosty" },
-        type: "default",
-        position: {
-          x: Math.floor(Math.random() * (100 - 15000) + 15000),
-          y: Math.floor(Math.random() * (100 - 12000) + 12000),
-        },
-        draggable: editMode,
-        deletable: editMode,
-        connectable: editMode,
-      };
-      newElements.push(newNode);
-      id++;
-      y = y + 300;
-    }
-
-    setNodes((nds) => nds.concat(newElements));
-  }, [editMode, setNodes]);
-
-  const changeType = useCallback(
-    (type: string) => {
-      setNodes((nds) => {
-        nds.map((node) => {
-          node.type = type;
-          return node;
-        });
-
-        return nds;
-      });
-    },
-    [setNodes]
-  );
-
-  useEffect(() => {
-    setNodes((nds) => {
-      console.log("effect render");
-      nds.map((node) => {
-        node.draggable = editMode;
-        node.connectable = editMode;
-        node.deletable = editMode;
-        return node;
-      });
-
-      return nds;
-    });
-  }, [editMode, setNodes]);
+  const addNodesAndEdges = () => {
+    newNodes(nodesNumber);
+    newEdges(edgesNumber);
+    setNodes(currentNodes);
+    setEdges(currentEdges);
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -109,27 +108,43 @@ export const Appbar = () => {
           >
             EDIT MODE
           </Button>
-          <Button onClick={addElements} size="large" color="inherit">
-            ADD 100 ELEMENTS
+
+          <Button onClick={addNodesAndEdges} size="large" color="inherit">
+            ADD NODES AND EDGES IN ONE PLACE
           </Button>
-          <Button onClick={addElementsPlace} size="large" color="inherit">
-            ADD 100 ELEMENTS IN ONE PLACE
-          </Button>
-          <Button
+          <label className="label-app">Nodes</label>
+          <input
+            type="number"
+            value={nodesNumber}
+            onChange={(e) => {
+              setNodesNumber(Number(e.target.value));
+            }}
+          />
+          <label className="label-app">Edges</label>
+          <input
+            type="number"
+            value={edgesNumber}
+            onChange={(e) => {
+              setEdgesNumber(Number(e.target.value));
+            }}
+          />
+
+          {/* <Button
             onClick={() => changeType("svgModule")}
             size="large"
             color="inherit"
           >
             CHANGE TYPES TO SVG
-          </Button>
-          <Button
+          </Button> */}
+          {/* <Button
             onClick={() => changeType("module")}
             size="large"
             color="inherit"
           >
             CHANGE TYPES TO DOM ELEMENT
-          </Button>
-          <Typography>{nodes.length} ELEMENTS</Typography>
+          </Button> */}
+          <Typography sx={{ marginLeft: 1 }}>{nodes.length} NODES</Typography>
+          <Typography sx={{ marginLeft: 1 }}>{edges.length} EDGES</Typography>
         </Toolbar>
       </AppBar>
     </Box>

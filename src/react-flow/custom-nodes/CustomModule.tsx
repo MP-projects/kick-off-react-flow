@@ -10,6 +10,7 @@ import socket from "../../assets/socket.png";
 export const CustomModule = (props: any) => {
   const { editMode } = useAppContext();
 
+  const { getNode } = useReactFlow();
   const isValidConnectionTarget = useCallback(
     (connection: any) => {
       return connection.source !== props.id;
@@ -26,7 +27,13 @@ export const CustomModule = (props: any) => {
 
   return (
     <>
-      <div className={`customModule`}>
+      <div
+        className={`customModule`}
+        onClick={() => {
+          const node = getNode(props.id);
+          console.log(node);
+        }}
+      >
         <aside
           className={`customModule__input-container ${
             props.selected ? "customModule__input-container--selected" : ""
